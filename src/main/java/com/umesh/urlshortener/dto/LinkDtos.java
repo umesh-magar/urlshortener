@@ -8,7 +8,7 @@ import java.time.Instant;
 
 public class LinkDtos {
     private LinkDtos(){};
-    public record  linkCreateRequest(
+    public record  LinkCreateRequest(
             @NotBlank(message = "original url is required")
             @Size(max = 2048,message = "URL cannot exceeds 2000 character")
             String originalUrl,
@@ -21,7 +21,7 @@ public class LinkDtos {
             @Min(value = 1, message = "Max clicks must be at least 1")
             Long maxClicks
     ){};
-    public record linkUpdateRequest(
+    public record LinkUpdateRequest(
             @NotBlank(message = "Original URL is required")
             @Size(max = 2048, message = "URL cannot exceeds 2000 character")
             String originalUrl,

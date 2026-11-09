@@ -1,8 +1,7 @@
 package com.umesh.urlshortener.services;
 
-import com.umesh.urlshortener.dto.LinkRequestDto;
-import com.umesh.urlshortener.dto.LinkResponseDto;
+import com.umesh.urlshortener.dto.LinkDtos;
 
 public interface LinkService {
-    LinkResponseDto createShortCode(LinkRequestDto linkRequestDto);
+    LinkDtos.LinkResponse createShortCode(LinkDtos.LinkCreateRequest linkRequestDto);
 }
