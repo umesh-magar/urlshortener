@@ -46,6 +46,7 @@ public class LinkServiceImpl implements LinkService {
             shortCode=linkRequestDto.customAlias().trim().toLowerCase(Locale.ROOT);
             validateAlias(shortCode);
         }
+        if(ReservedCodes)
 
         return null;
     }

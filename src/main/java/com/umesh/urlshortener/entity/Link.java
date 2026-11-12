@@ -33,7 +33,7 @@ public class Link {
     @Column(name = "expires_at")
     private Instant expiresAt;
     @Column(name="max_clicks")
-    private String maxClicks;
+    private Long maxClicks;
     @Column(name="click_counts")
     private Long clickCount=0L;
     @Column(name = "created_at")
