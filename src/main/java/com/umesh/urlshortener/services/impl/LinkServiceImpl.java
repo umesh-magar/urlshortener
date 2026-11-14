@@ -4,12 +4,15 @@ import com.umesh.urlshortener.config.ShortenerProperties;
 import com.umesh.urlshortener.config.UrlValidator;
 import com.umesh.urlshortener.dto.LinkDtos.LinkResponse;
 import com.umesh.urlshortener.dto.LinkDtos.LinkCreateRequest;
+import com.umesh.urlshortener.entity.Link;
 import com.umesh.urlshortener.exceptions.FieldValidationException;
 import com.umesh.urlshortener.exceptions.ForbiddenException;
+import com.umesh.urlshortener.exceptions.ResourceNotFoundException;
 import com.umesh.urlshortener.repository.LinkRepository;
 import com.umesh.urlshortener.repository.UserRepository;
 import com.umesh.urlshortener.services.LinkService;
 import com.umesh.urlshortener.utils.ShortCodeGenerator;
+import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.stereotype.Service;
 
 import java.util.Locale;
@@ -46,9 +49,17 @@ public class LinkServiceImpl implements LinkService {
             shortCode=linkRequestDto.customAlias().trim().toLowerCase(Locale.ROOT);
             validateAlias(shortCode);
         }
-        if(ReservedCodes)
+
 
         return null;
+    }
+    private Link findOwned(Long userId, Long id) {
+
+        return linkRepository
+                .findByIdAndUser_IdAndDeletedAtIsNull(id, userId)
+                .orElseThrow(
+                        () -> new ResourceNotFoundException("Link not found")
+                );
     }
     private void validateAlias(String alias){
         if(!ALIAS.matcher(alias).matches()){
