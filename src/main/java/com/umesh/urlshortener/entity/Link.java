@@ -30,6 +30,11 @@ public class Link {
     private String originalUrl;
     @Column(length = 150)
     private String title;
+    @Column(name = "custom_alias", nullable = false)
+    private boolean customAlias = false;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private LinkStatus status = LinkStatus.ACTIVE;
     @Column(name = "expires_at")
     private Instant expiresAt;
     @Column(name="max_clicks")
@@ -51,6 +56,26 @@ public class Link {
     @PreUpdate
     protected void onUpdate(){
         updatedAt=Instant.now();
+    }
+    public LinkState currentState() {
+
+        if (deletedAt != null) {
+            return LinkState.DELETED;
+        }
+
+        if (status == LinkStatus.DISABLED) {
+            return LinkState.DISABLED;
+        }
+
+        if (expiresAt != null && !expiresAt.isAfter(Instant.now())) {
+            return LinkState.EXPIRED;
+        }
+
+        if (maxClicks != null && clickCount >= maxClicks) {
+            return LinkState.LIMIT_REACHED;
+        }
+
+        return LinkState.ACTIVE;
     }
 
 }

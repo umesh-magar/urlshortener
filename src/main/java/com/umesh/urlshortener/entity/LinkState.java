@@ -4,5 +4,6 @@ public enum LinkState {
     ACTIVE,
     DISABLED,
     EXPIRED,
-    LIMIT_REACHED
+    LIMIT_REACHED,
+    DELETED
 }
