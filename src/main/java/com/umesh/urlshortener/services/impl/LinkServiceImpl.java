@@ -5,10 +5,12 @@ import com.umesh.urlshortener.config.UrlValidator;
 import com.umesh.urlshortener.dto.LinkDtos.LinkResponse;
 import com.umesh.urlshortener.dto.LinkDtos.LinkCreateRequest;
 import com.umesh.urlshortener.entity.Link;
+import com.umesh.urlshortener.entity.User;
 import com.umesh.urlshortener.exceptions.ConflictException;
 import com.umesh.urlshortener.exceptions.FieldValidationException;
 import com.umesh.urlshortener.exceptions.ForbiddenException;
 import com.umesh.urlshortener.exceptions.ResourceNotFoundException;
+import com.umesh.urlshortener.mappers.LinkMapper;
 import com.umesh.urlshortener.repository.LinkRepository;
 import com.umesh.urlshortener.repository.UserRepository;
 import com.umesh.urlshortener.services.LinkService;
@@ -29,13 +31,15 @@ public class LinkServiceImpl implements LinkService {
     private final UrlValidator urlValidator;
     private final ShortenerProperties props;
     private final ShortCodeGenerator shortCodeGenerator;
+    private final LinkMapper linkMapper;
 
-    public LinkServiceImpl(LinkRepository linkRepository, UserRepository userRepository, UrlValidator urlValidator, ShortenerProperties props, ShortCodeGenerator shortCodeGenerator) {
+    public LinkServiceImpl(LinkRepository linkRepository, UserRepository userRepository, UrlValidator urlValidator, ShortenerProperties props, ShortCodeGenerator shortCodeGenerator,LinkMapper linkMapper) {
         this.userRepository = userRepository;
         this.linkRepository = linkRepository;
         this.urlValidator = urlValidator;
         this.shortCodeGenerator = shortCodeGenerator;
         this.props = props;
+        this.linkMapper=linkMapper;
     }
 
     @Override
@@ -52,13 +56,15 @@ public class LinkServiceImpl implements LinkService {
             validateAlias(shortCode);
         }
         if (linkRepository.existsByShortCode(shortCode)) {
-            throw new ConflictException("Allias is already taken");
+            throw new ConflictException("Alias is already taken");
 
     } else {
         shortCode = generateUniqueCode();
     }
-
-        return null;
+        User user=userRepository.getReferenceById(userId);
+        Link link=linkMapper.toEntity(linkRequestDto,user,shortCode,custom);
+        Link savedLink=linkRepository.save(link);
+        return linkMapper.toResponse(savedLink);
     }
     private Link findOwned(Long userId, Long id) {
 
