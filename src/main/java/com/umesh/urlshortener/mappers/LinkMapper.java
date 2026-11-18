@@ -18,6 +18,19 @@ public class LinkMapper {
                 .build();
     }
     public LinkDtos.LinkResponse toResponse(Link link){
-        return null;
+        return new LinkDtos.LinkResponse(
+                link.getLinkId(),
+                link.getShortCode(),
+                link.getShortCode(),
+                link.getOriginalUrl(),
+                link.getTitle(),
+                link.isCustomAlias(),
+                link.getStatus(),
+                link.getExpiresAt(),
+                link.getMaxClicks(),
+                link.getClickCount(),
+                link.getCreatedAt(),
+                link.getUpdatedAt()
+        );
     }
 }
