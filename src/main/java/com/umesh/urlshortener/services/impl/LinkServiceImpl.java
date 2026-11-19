@@ -17,6 +17,7 @@ import com.umesh.urlshortener.services.LinkService;
 import com.umesh.urlshortener.utils.ShortCodeGenerator;
 import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Locale;
 import java.util.regex.Pattern;
@@ -65,6 +66,13 @@ public class LinkServiceImpl implements LinkService {
         Link link=linkMapper.toEntity(linkRequestDto,user,shortCode,custom);
         Link savedLink=linkRepository.save(link);
         return linkMapper.toResponse(savedLink);
+    }
+    @Transactional(readOnly = true)
+    public LinkResponse get(Long userId, Long id) {
+
+        Link link = findOwned(userId, id);
+
+        return linkMapper.toResponse(link);
     }
     private Link findOwned(Long userId, Long id) {
 
