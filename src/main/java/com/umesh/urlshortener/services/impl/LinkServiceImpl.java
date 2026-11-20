@@ -19,6 +19,7 @@ import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.util.Locale;
 import java.util.regex.Pattern;
 
@@ -73,6 +74,13 @@ public class LinkServiceImpl implements LinkService {
         Link link = findOwned(userId, id);
 
         return linkMapper.toResponse(link);
+    }
+    @Transactional
+    public void delete(Long userId, Long id) {
+
+        Link link = findOwned(userId, id);
+
+        link.setDeletedAt(Instant.now());
     }
     private Link findOwned(Long userId, Long id) {
 
