@@ -2,6 +2,7 @@ package com.umesh.urlshortener.services.impl;
 
 import com.umesh.urlshortener.config.ShortenerProperties;
 import com.umesh.urlshortener.config.UrlValidator;
+import com.umesh.urlshortener.dto.LinkDtos;
 import com.umesh.urlshortener.dto.LinkDtos.LinkResponse;
 import com.umesh.urlshortener.dto.LinkDtos.LinkCreateRequest;
 import com.umesh.urlshortener.entity.Link;
@@ -15,7 +16,6 @@ import com.umesh.urlshortener.repository.LinkRepository;
 import com.umesh.urlshortener.repository.UserRepository;
 import com.umesh.urlshortener.services.LinkService;
 import com.umesh.urlshortener.utils.ShortCodeGenerator;
-import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -75,6 +75,26 @@ public class LinkServiceImpl implements LinkService {
 
         return linkMapper.toResponse(link);
     }
+
+    @Transactional
+    public LinkResponse update(
+            Long userId,
+            Long id,
+            LinkDtos.LinkUpdateRequest req
+    ) {
+
+        Link link = findOwned(userId, id);
+
+        link.setOriginalUrl(
+                urlValidator.validate(req.originalUrl())
+        );
+
+        link.setTitle(blankToNull(req.title()));
+        link.setExpiresAt(req.expiresAt());
+        link.setMaxClicks(req.maxClicks());
+
+        return linkMapper.toResponse(link);
+    }
     @Transactional
     public void delete(Long userId, Long id) {
 
@@ -109,5 +129,11 @@ public class LinkServiceImpl implements LinkService {
         String base = props.baseUrl();
         String normalizeBase = base.endsWith("/") ? base.substring(0, base.length() - 1) : base;
         return normalizeBase + "/" + code;
+    }
+    private static String blankToNull(String value) {
+
+        return value == null || value.isBlank()
+                ? null
+                : value.trim();
     }
 }
