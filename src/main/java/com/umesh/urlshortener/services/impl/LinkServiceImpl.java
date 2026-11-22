@@ -6,6 +6,7 @@ import com.umesh.urlshortener.dto.LinkDtos;
 import com.umesh.urlshortener.dto.LinkDtos.LinkResponse;
 import com.umesh.urlshortener.dto.LinkDtos.LinkCreateRequest;
 import com.umesh.urlshortener.entity.Link;
+import com.umesh.urlshortener.entity.LinkStatus;
 import com.umesh.urlshortener.entity.User;
 import com.umesh.urlshortener.exceptions.ConflictException;
 import com.umesh.urlshortener.exceptions.FieldValidationException;
@@ -92,6 +93,26 @@ public class LinkServiceImpl implements LinkService {
         link.setTitle(blankToNull(req.title()));
         link.setExpiresAt(req.expiresAt());
         link.setMaxClicks(req.maxClicks());
+
+        return linkMapper.toResponse(link);
+    }
+    @Transactional
+    public LinkResponse changeStatus(
+            Long userId,
+            Long id,
+            LinkStatus status
+    ) {
+
+        if (status == null) {
+            throw new FieldValidationException(
+                    "status",
+                    "Status must not be null"
+            );
+        }
+
+        Link link = findOwned(userId, id);
+
+        link.setStatus(status);
 
         return linkMapper.toResponse(link);
     }
