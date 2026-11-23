@@ -5,6 +5,8 @@ import com.umesh.urlshortener.config.UrlValidator;
 import com.umesh.urlshortener.dto.LinkDtos;
 import com.umesh.urlshortener.dto.LinkDtos.LinkResponse;
 import com.umesh.urlshortener.dto.LinkDtos.LinkCreateRequest;
+import com.umesh.urlshortener.dto.PageResponse;
+import com.umesh.urlshortener.dto.Paging;
 import com.umesh.urlshortener.entity.Link;
 import com.umesh.urlshortener.entity.LinkStatus;
 import com.umesh.urlshortener.entity.User;
@@ -17,10 +19,13 @@ import com.umesh.urlshortener.repository.LinkRepository;
 import com.umesh.urlshortener.repository.UserRepository;
 import com.umesh.urlshortener.services.LinkService;
 import com.umesh.urlshortener.utils.ShortCodeGenerator;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.util.Collection;
+import java.util.List;
 import java.util.Locale;
 import java.util.regex.Pattern;
 
@@ -75,6 +80,40 @@ public class LinkServiceImpl implements LinkService {
         Link link = findOwned(userId, id);
 
         return linkMapper.toResponse(link);
+    }
+    @Transactional(readOnly = true)
+    public PageResponse<LinkResponse> list(
+            Long userId,
+            String q,
+            LinkStatus status,
+            int page,
+            int size,
+            String sort
+    ) {
+
+        // 1. Prepare search pattern.
+        String pattern = (q == null || q.isBlank())
+                ? "%"
+                : "%" + escapeLike(
+                q.trim().toLowerCase(Locale.ROOT)
+        ) + "%";
+
+        // 2. Prepare status filter.
+        Collection<LinkStatus> statuses = status == null
+                ? List.of(LinkStatus.ACTIVE, LinkStatus.DISABLED)
+                : List.of(status);
+
+        // 3. Execute paginated search.
+        Page<Link> links = linkRepository.search(
+                userId,
+                statuses,
+                pattern,
+                Paging.ofLinks(page, size, sort)
+        );
+
+        // 4. Convert entity page into response page.
+//        return PageResponse.from(links, linkMapper.toResponse(links));
+        return null;
     }
 
     @Transactional
@@ -156,5 +195,12 @@ public class LinkServiceImpl implements LinkService {
         return value == null || value.isBlank()
                 ? null
                 : value.trim();
+    }
+    private static String escapeLike(String value) {
+
+        return value
+                .replace("\\", "\\\\")
+                .replace("%", "\\%")
+                .replace("_", "\\_");
     }
 }
